@@ -1,0 +1,111 @@
+swagger: '2.0'
+info:
+  title: MSD Agente de Integración
+  description: 'Agente local de integración de datos en el MSD y Plataforma Tecnológica'
+  termsOfService: 'http://www.juntadeandalucia.es/informacion/legal.html'
+  contact:
+    email: cau.transparenciayportal@juntadeandalucia.es
+    url: 'https://www.juntadeandalucia.es/'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  version: 0.1.0
+host: 192.168.0.125:9080
+basePath: /
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  '/bid/{id}':
+    get:
+      tags:
+        - Item
+      description: Descarga el contenido de un item por su BID.
+      operationId: getItem
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Item obtenido con el Id.
+          schema:
+            $ref: '#/definitions/Item'
+          examples:
+            application/json:
+              id: 2
+              description: 'SegundoArticulo'
+              uds: 22
+        '404':
+          description: El ID especificado no ha sido encontrado en la BBDD
+    parameters:
+      - name: id
+        in: path
+        description: ID del item
+        required: true
+        type: string
+  '/all':
+    get:
+      tags:
+        - Item
+      description: Descarga todos los items de la BBDD
+      operationId: getAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Item obtenido con el Id.
+          schema:
+            $ref: '#/definitions/Item'
+          examples:
+            application/json:
+              - id: 2
+                description: 'SegundoArticulo'
+                uds: 22
+              - id: 3
+                description: 'TercerArticulo'
+                uds: 30
+  '/count':
+    get:
+      tags:
+        - Item
+      description: Devuelve el número de elementos de la BBDD correspondiente al ITEM
+      operationId: countAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Item obtenido con el Id.
+          examples:
+            application/json:
+              num_elements: 4
+definitions:
+  Item:
+    example:
+      key: key1
+      offset: 2
+      partition: 0
+      topic: topic
+      value: value1
+      headers:
+        - key: key1
+          value: dmFsdWUx
+        - key: key2
+          value: dmFsdWUy
+    properties:
+      id:
+        type: integer
+      description:
+        type: string
+      uds:
+        format: int32
+        type: integer
+    title: Item
+    type: object
+tags:
+  - name: Items
+    description: 'Elementos a sincronizar'
+externalDocs:
+  description: Más información
+  url: 'https://gitlab.juntadeandalucia.es/'

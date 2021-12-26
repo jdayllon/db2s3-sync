@@ -1,0 +1,72 @@
+version: '3.7'
+
+services:
+
+  mariadb_dbsync:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+        - 13306:3306
+    volumes:
+        - ./database-create.sql:/docker-entrypoint-initdb.d/00-create-db.sql:ro
+        
+  adminer_dbsync:
+    image: adminer
+    restart: always
+    ports:
+      - 38080:8080
+
+  agent:
+    build: .
+    restart: always
+    depends_on:
+      - mariadb_dbsync
+      - minio
+    ports:
+      - 28080:28080
+    volumes:
+      - ./dbsync.yaml:/opt/minifi/minifi-current/conf/config.yml
+      
+  minio:
+    container_name: "minio"
+    hostname: "minio"  
+    restart: unless-stopped
+    image: minio/minio:latest
+    #volumes:
+    #  - "./data:/data"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+    environment:
+      MINIO_ROOT_USER: root_access
+      MINIO_ROOT_PASSWORD: root_key
+      MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE
+      MINIO_SECRET_KEY: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server /data --console-address ":10001" --address ":10000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10001/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    volumes:
+      - "./swagger:/swagger"      
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:10000 root_access root_key;
+      /usr/bin/mc rm -r --force myminio/dbsync;
+      /usr/bin/mc rm -r --force myminio/swagger-dbsync;
+      /usr/bin/mc mb myminio/dbsync;
+      /usr/bin/mc mb myminio/swagger-dbsync;
+      /usr/bin/mc cp /swagger/* myminio/swagger-dbsync/;
+      /usr/bin/mc policy set public myminio/dbsync;
+      /usr/bin/mc policy set public myminio/swagger-dbsync;
+      /usr/bin/mc ls myminio/swagger-dbsync/;
+      exit 0;
+      "      
