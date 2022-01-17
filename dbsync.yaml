@@ -48,7 +48,7 @@ Security Properties:
   truststore password: ''
   ssl protocol: ''
   Sensitive Props:
-    key:
+    key: '123456790'
     algorithm: PBEWITHMD5AND256BITAES-CBC-OPENSSL
 Processors: []
 Controller Services:
@@ -56,12 +56,12 @@ Controller Services:
   name: MySQLConnection - Test
   type: org.apache.nifi.dbcp.DBCPConnectionPool
   Properties:
-    Database Connection URL: jdbc:mariadb://192.168.0.125:3306/test
+    Database Connection URL: jdbc:mariadb://mariadb_dbsync:3306/test
     Database Driver Class Name: org.mariadb.jdbc.Driver
     Database User: root
     Max Total Connections: '8'
     Max Wait Time: 500 millis
-    Password:
+    Password: root
     Validation-query: select UUID();
     database-driver-locations:
     dbcp-max-conn-lifetime: '-1'
@@ -174,7 +174,7 @@ Process Groups:
       Content Disposition:
       Content Type:
       Credentials File:
-      Endpoint Override URL: https://s3.gui11o.duckdns.org
+      Endpoint Override URL: http://minio:10000
       Expiration Time Rule:
       FullControl User List: ${s3.permissions.full.users}
       Multipart Part Size: 5 GB
@@ -771,7 +771,7 @@ Process Groups:
       auto-terminated relationships list: []
       Properties:
         AWS Credentials Provider service:
-        Access Key:
+        Access Key: root_access
         Bucket: swagger-dbsync
         Communications Timeout: 30 secs
         Credentials File:
@@ -781,7 +781,7 @@ Process Groups:
         Proxy Host Port:
         Region: us-west-2
         SSL Context Service:
-        Secret Key:
+        Secret Key: root_key
         Signer Override: Default Signature
         Version:
         encryption-service:
